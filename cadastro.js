@@ -111,6 +111,9 @@
   document.getElementById("back-dashboard").addEventListener("click", showDashboard);
 
   const recoveryHash = new URLSearchParams(location.hash.slice(1));
+  if (recoveryHash.has("access_token") && recoveryHash.get("type") !== "recovery") {
+    history.replaceState(null, "", location.pathname + location.search);
+  }
   if (recoveryHash.get("type") === "recovery") {
     recoveryToken = recoveryHash.get("access_token");
     history.replaceState(null, "", location.pathname + location.search);
@@ -221,7 +224,11 @@
     button.disabled = true;
     setMessage("Criando conta…");
     try {
-      const response = await fetch(`${config.supabaseUrl}/auth/v1/signup`, {
+      const signupEndpoint = new URL(`${config.supabaseUrl}/auth/v1/signup`);
+      if (/^https?:$/.test(location.protocol)) {
+        signupEndpoint.searchParams.set("redirect_to", new URL("cadastro.html", location.href).href);
+      }
+      const response = await fetch(signupEndpoint, {
         method: "POST",
         headers: { apikey: config.publishableKey, "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })
