@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17324d">
+  <title>Gestão de balanças</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <div class="eyebrow">Controle de equipamentos</div>
+    <h1 id="page-title">Gestão de balanças</h1>
+    <p id="message" role="status" aria-live="polite">Entre com sua conta para cadastrar uma balança.</p>
+
+    <form id="login-form">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="password">Senha</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+      <button type="submit">Entrar</button>
+      <button id="show-signup" type="button" class="secondary-button">Criar conta</button>
+      <button id="show-recovery" type="button" class="text-button">Esqueci minha senha</button>
+    </form>
+
+    <form id="signup-form" hidden>
+      <label for="signup-email">E-mail</label>
+      <input id="signup-email" type="email" autocomplete="email" required>
+      <label for="signup-password">Senha</label>
+      <input id="signup-password" type="password" autocomplete="new-password" minlength="6" required>
+      <label for="signup-confirm">Confirmar senha</label>
+      <input id="signup-confirm" type="password" autocomplete="new-password" minlength="6" required>
+      <button type="submit">Criar meu acesso</button>
+      <button id="show-login" type="button" class="secondary-button">Voltar para entrar</button>
+    </form>
+    <p id="signup-result" hidden></p>
+
+    <form id="recovery-form" hidden>
+      <label for="recovery-email">E-mail da conta</label>
+      <input id="recovery-email" type="email" autocomplete="email" required>
+      <button type="submit">Enviar link para redefinir</button>
+      <button id="recovery-back" type="button" class="secondary-button">Voltar para entrar</button>
+    </form>
+
+    <form id="reset-form" hidden>
+      <label for="new-password">Nova senha</label>
+      <input id="new-password" type="password" autocomplete="new-password" minlength="6" required>
+      <label for="confirm-new-password">Confirmar nova senha</label>
+      <input id="confirm-new-password" type="password" autocomplete="new-password" minlength="6" required>
+      <button type="submit">Salvar nova senha</button>
+    </form>
+
+    <section id="workspace" hidden>
+      <div class="session-bar"><span id="signed-in-as"></span><button id="logout" type="button" class="text-button">Sair</button></div>
+      <section id="dashboard">
+        <div class="dashboard-actions">
+          <button id="new-scale" type="button">Cadastrar balança</button>
+          <button id="refresh-scales" type="button" class="secondary-button">Atualizar lista</button>
+        </div>
+        <h2>Balanças cadastradas</h2>
+        <label for="scale-search">Buscar por código ou setor</label>
+        <input id="scale-search" type="search" placeholder="Ex.: BAL-001 ou Logística">
+        <p id="list-message" role="status"></p>
+        <div id="scale-list" class="scale-list"></div>
+      </section>
+      <section id="registration" hidden>
+        <button id="back-dashboard" type="button" class="text-button">← Voltar à dashboard</button>
+        <h2>Nova balança</h2>
+        <form id="scale-form">
+        <label for="codigo">Código</label>
+        <input id="codigo" name="codigo" type="text" placeholder="BAL-003" pattern="[Bb][Aa][Ll]-[0-9]+" maxlength="30" required>
+        <label for="setor">Setor</label>
+        <input id="setor" name="setor" type="text" maxlength="120" required>
+        <label for="responsavel">Responsável <span class="optional">(opcional)</span></label>
+        <input id="responsavel" name="responsavel" type="text" maxlength="120">
+        <label for="status">Situação</label>
+        <select id="status" name="status">
+          <option value="true">Ativa</option>
+          <option value="false">Inativa</option>
+        </select>
+        <label for="ultima_manutencao">Última manutenção <span class="optional">(opcional)</span></label>
+        <input id="ultima_manutencao" name="ultima_manutencao" type="date">
+        <button type="submit">Cadastrar balança</button>
+        </form>
+        <p id="saved-link" hidden></p>
+      </section>
+    </section>
+  </main>
+  <script src="config.js"></script>
+  <script src="cadastro.js"></script>
+</body>
+</html>

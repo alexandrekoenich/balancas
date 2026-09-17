@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cartão da balança</title>
+  <link rel="stylesheet" href="cartao.css">
+</head>
+<body>
+  <main>
+    <section class="controls">
+      <a id="back-link" href="index.html">← Voltar à ficha</a>
+      <h1>Cartão da balança <span id="heading-code"></span></h1>
+      <p id="message" role="status" aria-live="polite">Preparando cartão…</p>
+      <div id="address-settings">
+        <label for="site-url">Endereço público do site</label>
+        <div class="address-row">
+          <input id="site-url" type="url" placeholder="https://usuario.github.io/balancas/" inputmode="url">
+          <button id="apply-url" type="button">Aplicar</button>
+        </div>
+        <p class="hint">O QR Code abrirá a ficha desta balança nesse endereço. Salve o cartão somente depois de publicar o site.</p>
+      </div>
+      <button id="print-button" type="button" disabled>Imprimir ou salvar PDF</button>
+      <p class="hint">Na impressão, selecione escala de 100% e margens “Nenhuma”. O cartão mede 86 × 54 mm.</p>
+    </section>
+
+    <section class="card-stage" aria-label="Prévia do cartão">
+      <div class="print-card" id="print-card">
+        <div class="brand-side">
+          <div class="brand">
+            <img class="brand-logo" src="assets/vida-preto.png" alt="Vida Tecnologia Ambiental">
+          </div>
+          <div class="scale-code" id="card-code"></div>
+        </div>
+        <div class="qr-side" id="qrcode" aria-label="QR Code da ficha da balança"></div>
+      </div>
+    </section>
+  </main>
+  <script src="config.js"></script>
+  <script src="vendor/qrcode.js"></script>
+  <script src="cartao.js"></script>
+</body>
+</html>
