@@ -39,5 +39,10 @@ h2 { margin: 22px 0 14px; font-size: 1.25rem; }
 .scale-item-actions { flex-wrap: wrap; justify-content: flex-start; }
 .scale-item-actions a { font-size: .9rem; font-weight: 650; }
 .status-badge { padding: 4px 8px; border-radius: 99px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
-.status-badge.active { color: #17643c; background: #e2f3e9; }
-.status-badge.inactive { color: #815323; background: #fff0db; }
+.status-badge.ativa { color: #17643c; background: #e2f3e9; }
+.status-badge.inativa { color: #815323; background: #fff0db; }
+.status-badge.manutencao { color: #73519a; background: #f0e9fa; }
+.situation-editor { display: grid; gap: 7px; margin-top: 16px; padding-top: 12px; border-top: 1px solid #d7e2e7; }
+.situation-editor label { margin: 0; font-size: .85rem; }
+.situation-editor button { margin-top: 2px; }
+.situation-editor span { font-size: .85rem; color: #526675; }

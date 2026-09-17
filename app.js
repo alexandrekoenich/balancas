@@ -20,7 +20,7 @@
   const labels = {
     id: "Identificação", codigo: "Código", local: "Local", localizacao: "Localização",
     marca: "Marca", modelo: "Modelo", numero_serie: "Número de série",
-    serie: "Número de série", capacidade: "Capacidade", status: "Status",
+    serie: "Número de série", capacidade: "Capacidade", status: "Situação", situacao: "Situação",
     setor: "Setor", responsavel: "Responsável",
     ultima_calibracao: "Última calibração", proxima_calibracao: "Próxima calibração",
     ultima_manutencao: "Última manutenção", observacao: "Observação"
@@ -41,14 +41,17 @@
     }
     for (const [key, value] of Object.entries(record)) {
       if (value == null || value === "" || !labels[key]) continue;
+      if (key === "status" && record.situacao) continue;
       const row = document.createElement("div");
       row.className = "row";
       const dt = document.createElement("dt");
       const dd = document.createElement("dd");
       dt.textContent = labels[key];
-      dd.textContent = key === "status" && typeof value === "boolean"
-        ? (value ? "Ativa" : "Inativa")
-        : String(value);
+      dd.textContent = key === "situacao"
+        ? ({ ativa: "Ativa", inativa: "Inativa", manutencao: "Em manutenção" }[value] || String(value))
+        : key === "status" && typeof value === "boolean"
+          ? (value ? "Ativa" : "Inativa")
+          : String(value);
       row.append(dt, dd);
       details.append(row);
     }

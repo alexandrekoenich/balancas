@@ -17,6 +17,17 @@
   let accessToken = null;
   let recoveryToken = null;
   let scales = [];
+  let hasSituationColumn = false;
+
+  const situationLabels = {
+    ativa: "Ativa",
+    inativa: "Inativa",
+    manutencao: "Em manutenção"
+  };
+
+  function situationOf(scale) {
+    return situationLabels[scale.situacao] ? scale.situacao : (scale.status ? "ativa" : "inativa");
+  }
 
   function setMessage(text, error = false) {
     message.textContent = text;
@@ -53,8 +64,9 @@
       const name = document.createElement("strong");
       name.textContent = scale.codigo;
       const badge = document.createElement("span");
-      badge.className = `status-badge ${scale.status ? "active" : "inactive"}`;
-      badge.textContent = scale.status ? "Ativa" : "Inativa";
+      const situation = situationOf(scale);
+      badge.className = `status-badge ${situation}`;
+      badge.textContent = situationLabels[situation];
       header.append(name, badge);
       const sector = document.createElement("p");
       sector.textContent = scale.setor || "Setor não informado";
@@ -67,8 +79,61 @@
       card.href = `cartao.html?id=${encodeURIComponent(scale.codigo)}`;
       card.textContent = "Gerar cartão";
       actions.append(view, card);
-      item.append(header, sector, actions);
+      const editor = document.createElement("div");
+      editor.className = "situation-editor";
+      const editorLabel = document.createElement("label");
+      editorLabel.textContent = "Alterar situação";
+      const select = document.createElement("select");
+      for (const [value, label] of Object.entries(situationLabels)) {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        select.append(option);
+      }
+      select.value = situation;
+      const save = document.createElement("button");
+      save.type = "button";
+      save.textContent = "Salvar situação";
+      const feedback = document.createElement("span");
+      feedback.setAttribute("role", "status");
+      save.addEventListener("click", () => saveSituation(scale.codigo, select.value, save, feedback));
+      editor.append(editorLabel, select, save, feedback);
+      item.append(header, sector, actions, editor);
       scaleList.append(item);
+    }
+  }
+
+  async function saveSituation(codigo, situacao, button, feedback) {
+    if (situacao === "manutencao" && !hasSituationColumn) {
+      feedback.textContent = "Atualize a tabela no Supabase para usar Em manutenção.";
+      return;
+    }
+    button.disabled = true;
+    feedback.textContent = "Salvando…";
+    try {
+      const url = new URL(`${config.supabaseUrl}/rest/v1/${encodeURIComponent(config.table)}`);
+      url.searchParams.set(config.idColumn, `eq.${codigo}`);
+      const data = { status: situacao === "ativa" };
+      if (hasSituationColumn) data.situacao = situacao;
+      const response = await fetch(url, {
+        method: "PATCH",
+        headers: {
+          apikey: config.publishableKey,
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify(data)
+      });
+      if (!response.ok) throw new Error(await apiError(response));
+      const changed = await response.json();
+      if (!changed.length) throw new Error("Conta sem permissão para alterar esta balança.");
+      await loadScales();
+      setMessage(`${codigo}: situação alterada para ${situationLabels[situacao]}.`);
+    } catch (error) {
+      feedback.textContent = `Não foi possível salvar: ${error.message}`;
+    } finally {
+      button.disabled = false;
     }
   }
 
@@ -76,12 +141,13 @@
     listMessage.textContent = "Carregando balanças…";
     try {
       const url = new URL(`${config.supabaseUrl}/rest/v1/${encodeURIComponent(config.table)}`);
-      url.searchParams.set("select", "codigo,setor,status,responsavel");
+      url.searchParams.set("select", "*");
       url.searchParams.set("order", "codigo.asc");
       url.searchParams.set("limit", "1000");
       const response = await fetch(url, { headers: { apikey: config.publishableKey } });
       if (!response.ok) throw new Error(await apiError(response));
       scales = await response.json();
+      hasSituationColumn = scales.some((scale) => Object.hasOwn(scale, "situacao"));
       renderScales();
     } catch {
       listMessage.textContent = "Não foi possível carregar as balanças. Tente atualizar a lista.";
@@ -297,13 +363,19 @@
     if (!accessToken) return;
     const button = scaleForm.querySelector("button");
     const codigo = document.getElementById("codigo").value.trim().toUpperCase();
+    const situacao = document.getElementById("status").value;
+    if (situacao === "manutencao" && !hasSituationColumn) {
+      setMessage("Atualize a tabela no Supabase para cadastrar uma balança em manutenção.", true);
+      return;
+    }
     const data = {
       codigo,
       setor: document.getElementById("setor").value.trim(),
       responsavel: document.getElementById("responsavel").value.trim() || null,
-      status: document.getElementById("status").value === "true",
+      status: situacao === "ativa",
       ultima_manutencao: document.getElementById("ultima_manutencao").value || null
     };
+    if (hasSituationColumn) data.situacao = situacao;
     button.disabled = true;
     savedLink.hidden = true;
     setMessage("Salvando balança…");
