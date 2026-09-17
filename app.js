@@ -54,8 +54,6 @@
     }
     message.hidden = true;
     details.hidden = false;
-    document.getElementById("card-link").href = `cartao.html?id=${encodeURIComponent(id.toUpperCase())}`;
-    document.getElementById("card-action").hidden = false;
   } catch {
     message.textContent = "Não foi possível consultar esta balança. Tente novamente mais tarde.";
   }

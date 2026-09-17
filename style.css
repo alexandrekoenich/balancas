@@ -27,10 +27,7 @@ button:disabled { opacity: .55; cursor: wait; }
 .text-button { margin: 0; padding: 6px 0; background: none; color: #176f78; }
 .text-button:hover { background: none; text-decoration: underline; }
 [hidden] { display: none !important; }
-.footer-link { margin: 24px 0 0; font-size: .9rem; }
 a { color: #176f78; }
-.action-link { display: inline-block; padding: 11px 16px; border-radius: 8px; background: #176f78; color: #fff; font-weight: 700; text-decoration: none; }
-.action-link:hover { background: #125a62; }
 h2 { margin: 22px 0 14px; font-size: 1.25rem; }
 .dashboard-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .dashboard-actions button { margin-top: 8px; }
