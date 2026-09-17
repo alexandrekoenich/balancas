@@ -18,6 +18,7 @@
   let recoveryToken = null;
   let scales = [];
   let hasSituationColumn = false;
+  let editingCode = null;
 
   const situationLabels = {
     ativa: "Ativa",
@@ -40,10 +41,34 @@
   }
 
   function showDashboard() {
+    editingCode = null;
+    scaleForm.reset();
+    document.getElementById("codigo").readOnly = false;
+    document.getElementById("codigo-hint").hidden = true;
     registration.hidden = true;
     dashboard.hidden = false;
     document.getElementById("page-title").textContent = "Balanças";
     setMessage("Consulte uma balança ou gere seu cartão.");
+  }
+
+  function openScaleForm(scale = null) {
+    scaleForm.reset();
+    editingCode = scale?.codigo || null;
+    document.getElementById("codigo").value = scale?.codigo || "";
+    document.getElementById("codigo").readOnly = Boolean(editingCode);
+    document.getElementById("codigo-hint").hidden = !editingCode;
+    document.getElementById("setor").value = scale?.setor || "";
+    document.getElementById("responsavel").value = scale?.responsavel || "";
+    document.getElementById("status").value = scale ? situationOf(scale) : "ativa";
+    document.getElementById("ultima_manutencao").value = scale?.ultima_manutencao?.slice(0, 10) || "";
+    document.getElementById("form-title").textContent = editingCode ? `Editar ${editingCode}` : "Nova balança";
+    document.getElementById("form-submit").textContent = editingCode ? "Salvar alterações" : "Cadastrar balança";
+    savedLink.hidden = true;
+    dashboard.hidden = true;
+    registration.hidden = false;
+    document.getElementById("page-title").textContent = editingCode ? "Editar balança" : "Cadastrar balança";
+    setMessage(editingCode ? "Atualize as informações da balança." : "Preencha os dados da nova balança.");
+    document.getElementById(editingCode ? "setor" : "codigo").focus();
   }
 
   function renderScales() {
@@ -78,7 +103,11 @@
       const card = document.createElement("a");
       card.href = `cartao.html?id=${encodeURIComponent(scale.codigo)}`;
       card.textContent = "Gerar cartão";
-      actions.append(view, card);
+      const edit = document.createElement("button");
+      edit.type = "button";
+      edit.textContent = "Editar";
+      edit.addEventListener("click", () => openScaleForm(scale));
+      actions.append(view, card, edit);
       const editor = document.createElement("div");
       editor.className = "situation-editor";
       const editorLabel = document.createElement("label");
@@ -167,13 +196,7 @@
 
   scaleSearch.addEventListener("input", renderScales);
   document.getElementById("refresh-scales").addEventListener("click", loadScales);
-  document.getElementById("new-scale").addEventListener("click", () => {
-    dashboard.hidden = true;
-    registration.hidden = false;
-    document.getElementById("page-title").textContent = "Cadastrar balança";
-    setMessage("Preencha os dados da nova balança.");
-    document.getElementById("codigo").focus();
-  });
+  document.getElementById("new-scale").addEventListener("click", () => openScaleForm());
   document.getElementById("back-dashboard").addEventListener("click", showDashboard);
 
   const recoveryHash = new URLSearchParams(location.hash.slice(1));
@@ -361,52 +384,58 @@
   scaleForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (!accessToken) return;
-    const button = scaleForm.querySelector("button");
+    const button = document.getElementById("form-submit");
+    const isEdit = Boolean(editingCode);
     const codigo = document.getElementById("codigo").value.trim().toUpperCase();
     const situacao = document.getElementById("status").value;
     if (situacao === "manutencao" && !hasSituationColumn) {
-      setMessage("Atualize a tabela no Supabase para cadastrar uma balança em manutenção.", true);
+      setMessage("Atualize a tabela no Supabase para usar a situação Em manutenção.", true);
       return;
     }
     const data = {
-      codigo,
       setor: document.getElementById("setor").value.trim(),
       responsavel: document.getElementById("responsavel").value.trim() || null,
       status: situacao === "ativa",
       ultima_manutencao: document.getElementById("ultima_manutencao").value || null
     };
+    if (!isEdit) data.codigo = codigo;
     if (hasSituationColumn) data.situacao = situacao;
     button.disabled = true;
     savedLink.hidden = true;
-    setMessage("Salvando balança…");
+    setMessage(isEdit ? "Salvando alterações…" : "Salvando balança…");
     try {
-      const response = await fetch(`${config.supabaseUrl}/rest/v1/${encodeURIComponent(config.table)}`, {
-        method: "POST",
+      const url = new URL(`${config.supabaseUrl}/rest/v1/${encodeURIComponent(config.table)}`);
+      if (isEdit) url.searchParams.set(config.idColumn, `eq.${editingCode}`);
+      const response = await fetch(url, {
+        method: isEdit ? "PATCH" : "POST",
         headers: {
           apikey: config.publishableKey,
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
-          Prefer: "return=minimal"
+          Prefer: isEdit ? "return=representation" : "return=minimal"
         },
         body: JSON.stringify(data)
       });
       if (!response.ok) {
         const detail = await apiError(response);
         if (response.status === 401 || response.status === 403) {
-          throw new Error("Conta sem permissão para cadastrar. Verifique a política de INSERT no Supabase.");
+          throw new Error(`Conta sem permissão para ${isEdit ? "editar" : "cadastrar"}. Verifique as políticas no Supabase.`);
         }
-        if (response.status === 409 || /duplicate|unique/i.test(detail)) {
+        if (!isEdit && (response.status === 409 || /duplicate|unique/i.test(detail))) {
           throw new Error(`O código ${codigo} já está cadastrado.`);
         }
         throw new Error(detail);
       }
-      setMessage(`${codigo} cadastrada com sucesso.`);
+      if (isEdit && !(await response.json()).length) {
+        throw new Error("Conta sem permissão para editar esta balança.");
+      }
+      setMessage(`${codigo} ${isEdit ? "atualizada" : "cadastrada"} com sucesso.`);
       const link = document.createElement("a");
       link.href = `index.html?id=${encodeURIComponent(codigo)}`;
       link.textContent = `Ver ficha da ${codigo}`;
       savedLink.replaceChildren(link);
       savedLink.hidden = false;
-      scaleForm.reset();
+      if (!isEdit) scaleForm.reset();
       await loadScales();
     } catch (error) {
       setMessage(`Não foi possível cadastrar: ${error.message}`, true);

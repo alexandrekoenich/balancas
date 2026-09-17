@@ -15,6 +15,8 @@ form { display: grid; gap: 8px; }
 label { margin-top: 10px; font-weight: 650; }
 input, select, button { font: inherit; }
 input, select { width: 100%; padding: 11px 12px; border: 1px solid #b9c8d1; border-radius: 8px; background: #fff; color: #17324d; }
+input[readonly] { background: #eef2f4; color: #526675; }
+small { color: #526675; }
 input:focus, select:focus, button:focus-visible { outline: 3px solid #7ac9cf; outline-offset: 2px; }
 button { margin-top: 16px; padding: 12px 16px; border: 0; border-radius: 8px; background: #176f78; color: white; font-weight: 700; cursor: pointer; }
 button:hover { background: #125a62; }
@@ -38,6 +40,8 @@ h2 { margin: 22px 0 14px; font-size: 1.25rem; }
 .scale-item p { margin: 9px 0 16px; color: #526675; }
 .scale-item-actions { flex-wrap: wrap; justify-content: flex-start; }
 .scale-item-actions a { font-size: .9rem; font-weight: 650; }
+.scale-item-actions button { margin: 0; padding: 0; background: none; color: #176f78; font-size: .9rem; font-weight: 650; }
+.scale-item-actions button:hover { background: none; text-decoration: underline; }
 .status-badge { padding: 4px 8px; border-radius: 99px; font-size: .75rem; font-weight: 700; white-space: nowrap; }
 .status-badge.ativa { color: #17643c; background: #e2f3e9; }
 .status-badge.inativa { color: #815323; background: #fff0db; }

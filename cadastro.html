@@ -65,10 +65,11 @@
       </section>
       <section id="registration" hidden>
         <button id="back-dashboard" type="button" class="text-button">← Voltar à dashboard</button>
-        <h2>Nova balança</h2>
+        <h2 id="form-title">Nova balança</h2>
         <form id="scale-form">
         <label for="codigo">Código</label>
         <input id="codigo" name="codigo" type="text" placeholder="BAL-003" pattern="[Bb][Aa][Ll]-[0-9]+" maxlength="30" required>
+        <small id="codigo-hint" hidden>O código fica fixo para preservar os cartões QR já impressos.</small>
         <label for="setor">Setor</label>
         <input id="setor" name="setor" type="text" maxlength="120" required>
         <label for="responsavel">Responsável <span class="optional">(opcional)</span></label>
@@ -81,7 +82,7 @@
         </select>
         <label for="ultima_manutencao">Última manutenção <span class="optional">(opcional)</span></label>
         <input id="ultima_manutencao" name="ultima_manutencao" type="date">
-        <button type="submit">Cadastrar balança</button>
+        <button id="form-submit" type="submit">Cadastrar balança</button>
         </form>
         <p id="saved-link" hidden></p>
       </section>

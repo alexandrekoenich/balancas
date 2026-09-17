@@ -31,7 +31,8 @@ alter table public.balancas enable row level security;
 
 grant select, insert on public.balancas to authenticated;
 revoke update on public.balancas from authenticated;
-grant update (status, situacao) on public.balancas to authenticated;
+grant update (setor, responsavel, status, situacao, ultima_manutencao)
+on public.balancas to authenticated;
 
 drop policy if exists "Cadastrar balancas - usuario autorizado" on public.balancas;
 create policy "Cadastrar balancas - usuario autorizado"
@@ -44,7 +45,8 @@ on public.balancas for select to authenticated
 using (true);
 
 drop policy if exists "Atualizar situacao - usuario autorizado" on public.balancas;
-create policy "Atualizar situacao - usuario autorizado"
+drop policy if exists "Editar balancas - usuario autorizado" on public.balancas;
+create policy "Editar balancas - usuario autorizado"
 on public.balancas for update to authenticated
 using (auth.uid() = 'SUBSTITUA_PELO_UUID_DO_USUARIO'::uuid)
 with check (auth.uid() = 'SUBSTITUA_PELO_UUID_DO_USUARIO'::uuid);
